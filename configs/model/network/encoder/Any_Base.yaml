@@ -221,4 +221,4 @@ height: ${dataset.height}
 width: ${dataset.width}
 keep_subpatch: False
 modality_keep: ''
-flash_attn: True
+flash_attn: False

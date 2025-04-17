@@ -1,0 +1,48 @@
+# @package _global_
+
+defaults:
+  - override /dataset: CCAD_vers_v0_1
+  - override /model/network/encoder: Any_Base
+  - override /model: SemSeg
+  - override /model/network: Fine_tuning_SemSeg
+  - override /model/loss: CrossEntropyIgnore
+  - override /model/train_metrics: metrics_semseg
+  - override /model/val_metrics: metrics_semseg
+  - override /model/test_metrics: metrics_semseg
+
+dataset:
+  classif: False
+
+model:
+  name: "AnySat_FineTuning_SemSeg"
+  optimizer:
+    lr: 5e-5
+  network:
+    encoder:
+      scale: 4
+      keep_subpatch: True
+      modality_keep: "s2"
+    instance:
+      name: "target_encoder"
+      path: ${paths.root_dir}/.models/AnySat_full.pth
+  val_metrics:
+    get_classes: True
+  test_metrics:
+    get_classes: True
+  
+
+callbacks:
+  early_stopping:
+    monitor: "val/loss"
+    mode: "min"
+    patience: 10
+  model_checkpoint:
+    monitor: "val/mIoU"
+    mode: "max"
+    every_n_epochs: 5
+    save_last: True
+
+modalities:
+  - "s2"
+
+flash_attn: False

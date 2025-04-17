@@ -28,5 +28,5 @@ rasterio
 timm
 easydict
 geopandas
-flash-attn
+# flash-attn
 # sh            # for running bash commands in some tests (linux/macos only)
