@@ -246,18 +246,30 @@ class MetricsSemSeg(Metric):
         self.modality = modalities[0]
         self.num_classes = num_classes
         self.get_classes = get_classes
-        self.miou = MeanIoU(num_classes=num_classes, per_class=True)
+        # self.miou = MeanIoU(num_classes=num_classes, per_class=True)
+        self.miou = MeanIoU(num_classes=num_classes, per_class=True, input_format="index")
         self.save_results = save_results
         if save_results:
             self.results = {}
 
     def update(self, pred, gt):
-        label = gt['label'].flatten(0, 1).long()
-        self.miou(torch.nn.functional.one_hot(pred.flatten(2, 3).permute(0, 2 ,1).flatten(0, 1).argmax(dim=1), num_classes=self.num_classes), 
-                  torch.nn.functional.one_hot(label, num_classes=self.num_classes))
+        label = gt['label'].flatten(0, 2).long()
+        pred_vec = pred.flatten(2, 3).permute(0, 2 ,1).flatten(0, 1).argmax(dim=1)
+        gt_vec = label
+
+        self.miou.forward(pred_vec, gt_vec)
+        
         if self.save_results:
             for i, name in enumerate(gt['name']):
                 self.results[name] = list(pred.cpu()[i].numpy())
+
+    # def update(self, pred, gt):
+    #     label = gt['label'].flatten(0, 1).long()
+    #     self.miou(torch.nn.functional.one_hot(pred.flatten(2, 3).permute(0, 2 ,1).flatten(0, 1).argmax(dim=1), num_classes=self.num_classes), 
+    #               torch.nn.functional.one_hot(label, num_classes=self.num_classes))
+    #     if self.save_results:
+    #         for i, name in enumerate(gt['name']):
+    #             self.results[name] = list(pred.cpu()[i].numpy())
 
     def compute(self):
         if self.get_classes:
